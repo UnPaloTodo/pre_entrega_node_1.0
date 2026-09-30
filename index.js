@@ -72,6 +72,23 @@ async function borrar_entrada(id) {
     }
 }
 
+async function actualizar_entrada(id, producto) {
+    try {
+        const response = await fetch(`https://fakestoreapi.com/products/${id}`, {
+            method: "PUT",
+            body: JSON.stringify(producto),
+            headers: { "Content-Type": "application/json" },
+        });
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Error al actualizar el producto:", error);
+        return null;
+    }
+}
+
 switch (process.argv[2]) {
     case "GET": {
         const argumento = process.argv[3];
@@ -142,26 +159,37 @@ switch (process.argv[2]) {
         }
         break;
     }
+    case "PUT": {
+        const argumento = process.argv[3];
+
+        if (argumento) {
+            const [recurso, id] = argumento.split("/");
+
+            if (recurso === "products") {
+                if (id) {
+                    const producto = {
+                        title: process.argv[4],
+                        price: Number(process.argv[5]),
+                        category: process.argv[6]
+                    };
+
+                    const datos = await actualizar_entrada(id, producto);
+                    if (datos) {
+                        console.log("Producto actualizado:", datos);
+                    }
+                } else {
+                    console.log("Falta el id del producto a actualizar");
+                }
+            } else {
+                console.log("Recurso inválido");
+            }
+        } else {
+            console.log("Comando incompleto");
+        }
+        break;
+    }
     default:
         console.log("Comando incompleto o inválido");
 }
 
 console.log("Fin del programa");
-
-/* async function actualizar_entrada(id, producto) {
-    try {
-        const response = await fetch(`https://fakestoreapi.com/products/${id}`, {
-            method: "PUT",
-            body: JSON.stringify(producto),
-            headers: { "Content-Type": "application/json" },
-        });
-        if (!response.ok) {
-            throw new Error(`Error HTTP: ${response.status}`);
-        }
-        return await response.json();
-    } catch (error) {
-        console.error("Error al actualizar el producto:", error);
-        return null;
-    }
-}
-*/
